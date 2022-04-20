@@ -114,3 +114,63 @@ See Sitecore Containers documentation for more information on system requirement
 * You can also run the Next.js application directly using `npm` commands within `src\rendering`.
 * Debugging of the Next.js application is possible by using the `start:connected` or `start` scripts from the Next.js `package.json`, and the pre-configured *Attach to Process* VS Code launch configuration.
 * Review README's found in the projects and throughout the solution for additional information.
+
+## Deploy your environment to XM Cloud
+
+* Login to XM Cloud
+```
+dotnet sitecore cloud login
+```
+
+* Create a Project
+```
+dotnet sitecore cloud project create -n {PROJECT_NAME}
+```
+
+* Create an Environment
+```
+dotnet sitecore cloud environment create --project-id {PROJECT_ID} -n {ENVIRONMENT_NAME}
+```
+
+* NOTE THE ENVIRONMENT ID
+
+* Provision and Deploy the Environment with the Starter Kit source code
+```
+dotnet sitecore cloud deployment create --environment-id {ENVIRONMENT_ID} --upload
+```
+
+* Connect to the environment
+```
+dotnet sitecore cloud environment connect --environment-id {ENVIRONMENT_ID}
+```
+
+* Publish the edge content
+
+```
+$connectionName = (dotnet sitecore cloud environment info -id {ENVIRONMENT_ID} --json | ConvertFrom-Json).name
+dotnet sitecore publish --pt Edge -n $connectionName
+```
+
+## Create an Edge Token
+
+Running the following script with the environment id from the previous steps will create an Edge access token and launch the GraphQL Playground so that you can query content.
+
+After publishing, you can also use this key in order to run the JSS site against.
+
+```ps1
+.\New-EdgeToken.ps1 -EnvironmentId {ENVIRONMENT_ID}
+```
+
+## Rebuild Indexes
+
+After running `.\up.ps1` for the first time, or if you ever run `\docker\clean.ps1`, you will need to [rebuild the search indexes](https://doc.sitecore.com/developers/101/platform-administration-and-architecture/en/rebuild-search-indexes.html).
+
+You should now be able to view the Basic Company site at https://www.basic-company-nextjs.localhost.
+
+## Stop Sitecore
+
+When you're done, stop and remove the containers using the following command.
+
+```
+docker-compose down
+```
