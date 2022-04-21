@@ -94,7 +94,7 @@ dotnet sitecore index rebuild
 if (Test-Path .\src\items\content) {
 
     Write-Host "Pushing items to Sitecore..." -ForegroundColor Green
-    dotnet sitecore ser push --publish
+    dotnet sitecore ser push # --publish
     if ($LASTEXITCODE -ne 0) {
         Write-Error "Serialization push failed, see errors above."
     }
