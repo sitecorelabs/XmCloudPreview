@@ -36,8 +36,7 @@ defined in Sitecore's [scope of support](https://kb.sitecore.net/articles/463549
 See Sitecore Containers documentation for more information on system requirements.
 
 ## What's Included
-* A `docker-compose` environment for each Sitecore topology (XPO, XP1, XM1)
-  with an ASP.NET Core rendering host.
+* A `docker-compose` environment.
   > The containers structure is organized by specific topology environment (see `run\sitecore-xp0`, `run\sitecore-xp1`, `run\sitecore-xm1`).
   > The included `docker-compose.yml` is a stock environment from the Sitecore
   > Container Support Package. All changes/additions for this solution are included
@@ -71,9 +70,8 @@ See Sitecore Containers documentation for more information on system requirement
    > this command, PowerShell 7 is not supported at this time.
 
     ```ps1
-    .\init.ps1 -InitEnv -LicenseXmlPath "C:\path\to\license.xml" -AdminPassword "DesiredAdminPassword" -Topology xp0
+    .\init.ps1 -InitEnv -LicenseXmlPath "C:\path\to\license.xml" -AdminPassword "DesiredAdminPassword"
     ```
-    The ```-Topology ``` parameter specify topology you need. This parameter is optional. The default value ```xp0```
 
     If you check your `.env` into source control, other developers
     can prepare a certificate and hosts file entries by simply running:
@@ -163,9 +161,13 @@ After publishing, you can also use this key in order to run the JSS site against
 
 ## Rebuild Indexes
 
-After running `.\up.ps1` for the first time, or if you ever run `\docker\clean.ps1`, you will need to [rebuild the search indexes](https://doc.sitecore.com/developers/101/platform-administration-and-architecture/en/rebuild-search-indexes.html).
+After running `.\up.ps1` for the first time, or if you ever run `\docker\clean.ps1`, you will need to [rebuild the search indexes](https://doc.sitecore.com/developers/101/platform-administration-and-architecture/en/rebuild-search-indexes.html).  You can rebuild indexes by running:
 
-You should now be able to view the Basic Company site at https://www.basic-company-nextjs.localhost.
+```
+dotnet sitecore index rebuild
+```
+
+You should now be able to view the XmCloudPreview site at https://www.xmcloudpreview.localhost.
 
 ## Stop Sitecore
 
@@ -173,4 +175,10 @@ When you're done, stop and remove the containers using the following command.
 
 ```
 docker-compose down
+```
+
+or
+
+```ps1
+.\down.ps1
 ```
