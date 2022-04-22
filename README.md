@@ -1,4 +1,6 @@
-# XmCloudPreview
+# Sitecore XM Cloud Preview
+
+***NOTE: THIS SOLUTION IS NOT SUPPORTED BY SITECORE, CONTAINS PRE-RELEASE REFERENCES, AND WILL CONTAIN BUGS***
 
 ## About this Solution
 This solution is designed to help developers learn and get started quickly
