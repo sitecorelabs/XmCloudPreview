@@ -2,6 +2,26 @@
 
 ***NOTE: THIS SOLUTION IS NOT SUPPORTED BY SITECORE, CONTAINS PRE-RELEASE REFERENCES, AND WILL CONTAIN BUGS***
 
+## TLDR; QUICK START
+
+1. In an ADMIN terminal:
+
+    ```ps1
+    .\init.ps1 -InitEnv -LicenseXmlPath "C:\path\to\license.xml" -AdminPassword "DesiredAdminPassword"
+    ```
+
+2. Restart your terminal and run:
+
+    ```ps1
+    .\up.ps1
+    ```
+
+3. Follow the instructions to [deploy to XM Cloud](#deploy-to-xmcloud)
+
+4. Create Edge token and [query from edge](#query-edge)
+
+*** 
+
 ## About this Solution
 This solution is designed to help developers learn and get started quickly
 with Sitecore Containers, the Sitecore Next.js SDK, and Sitecore
@@ -115,7 +135,9 @@ See Sitecore Containers documentation for more information on system requirement
 * Debugging of the Next.js application is possible by using the `start:connected` or `start` scripts from the Next.js `package.json`, and the pre-configured *Attach to Process* VS Code launch configuration.
 * Review README's found in the projects and throughout the solution for additional information.
 
+<a name="deploy-to-xmcloud">
 ## Deploy your environment to XM Cloud
+</a>
 
 * Login to XM Cloud
 ```
@@ -151,7 +173,9 @@ $connectionName = (dotnet sitecore cloud environment info -id {ENVIRONMENT_ID} -
 dotnet sitecore publish --pt Edge -n $connectionName
 ```
 
-## Create an Edge Token
+<a name="query-edge">
+## Create an Edge Token and Query from Edge
+</a>
 
 Running the following script with the environment id from the previous steps will create an Edge access token and launch the GraphQL Playground so that you can query content.
 
@@ -159,6 +183,26 @@ After publishing, you can also use this key in order to run the JSS site against
 
 ```ps1
 .\New-EdgeToken.ps1 -EnvironmentId {ENVIRONMENT_ID}
+```
+
+Example GraphQL Query:
+
+```graphql
+query {
+  item(path:"/sitecore/content", language:"en") {
+    id
+  }
+  layout(language:"en", routePath:"/",site:"xmcloudpreview"){
+    item {
+      rendered
+    }
+  }
+  site {
+    siteInfoCollection{
+      name
+    }
+  }
+}
 ```
 
 ## Rebuild Indexes
