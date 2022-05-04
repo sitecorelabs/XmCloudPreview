@@ -17,4 +17,5 @@ RUN move C:\node-v%NODEJS_VERSION%-win-x64 c:\node
 RUN del node.zip
 
 RUN SETX /M PATH "%PATH%;C:\node"
+RUN icacls.exe c:\node /grant Users:(F) /t
 USER ContainerUser
