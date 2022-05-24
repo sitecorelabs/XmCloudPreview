@@ -1,9 +1,3 @@
-Param (
-    [switch]$SilentLogin,
-    [string]$AuthClientId,
-    [string]$AuthClientSecret,
-    [string]$xmCloudAud
-)
 $ErrorActionPreference = "Stop";
 
 $envContent = Get-Content .env -Encoding UTF8
@@ -11,13 +5,24 @@ $xmCloudHost = $envContent | Where-Object { $_ -imatch "^CM_HOST=.+" }
 $xmCloudDeployConfig = $envContent | Where-Object { $_ -imatch "^XMCLOUDDEPLOY_CONFIG=.+" }
 $sitecoreDockerRegistry = $envContent | Where-Object { $_ -imatch "^SITECORE_DOCKER_REGISTRY=.+" }
 $sitecoreVersion = $envContent | Where-Object { $_ -imatch "^SITECORE_VERSION=.+" }
-$xmCloudDomain = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_Domain=.+" }
+$SilentLogin = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_SilentLogin=.+" }
 
 $xmCloudHost = $xmCloudHost.Split("=")[1]
 $xmCloudDeployConfig = $xmCloudDeployConfig.Split("=")[1]
 $sitecoreDockerRegistry = $sitecoreDockerRegistry.Split("=")[1]
 $sitecoreVersion = $sitecoreVersion.Split("=")[1]
-$xmCloudDomain = $xmCloudDomain.Split("=")[1]
+$SilentLogin = $SilentLogin.Split("=")[1]
+if ($SilentLogin -eq "true") {
+	$xmCloudDomain = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_Domain=.+" }
+	$xmCloudAudSilentLogin = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_AudienceForSilentLogin=.+" }
+	$xmCloudClientId = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_ClientId=.+" }
+	$xmCloudClientSecret = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_ClientSecret=.+" }
+	$xmCloudDomain = $xmCloudDomain.Split("=")[1]
+	$xmCloudAudSilentLogin = $xmCloudAudSilentLogin.Split("=")[1]
+	$xmCloudClientId = $xmCloudClientId.Split("=")[1]
+	$xmCloudClientSecret = $xmCloudClientSecret.Split("=")[1]
+}
+
 
 # Double check whether init has been run
 $envCheckVariable = "HOST_LICENSE_FOLDER"
@@ -74,8 +79,8 @@ foreach ($pluginJsonFile in $pluginJsonFiles) {
 }
 
 Write-Host "Logging into Sitecore..." -ForegroundColor Green
-if ($SilentLogin) {
-    dotnet sitecore cloud login --authority $xmCloudDomain --audience $xmCloudAud --client-id $AuthClientId --client-secret $AuthClientSecret --client-credentials --allow-write true
+if ($SilentLogin -eq "true") {
+    dotnet sitecore cloud login --authority $xmCloudDomain --audience $xmCloudAudSilentLogin --client-id $xmCloudClientId --client-secret $xmCloudClientSecret --client-credentials
 }
 else {
     dotnet sitecore cloud login

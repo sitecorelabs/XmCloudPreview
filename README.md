@@ -124,6 +124,7 @@ See Sitecore Containers documentation for more information on system requirement
 
 1. When prompted, log into Sitecore via your browser, and
    accept the device authorization.
+    * To log in via client credentials flow, set the environment variable SITECORE_FedAuth_dot_Auth0_dot_SilentLogin to "true" and update values of the correspond environment variables (Domain, AudienceForSilentLogin, ClientId, ClientSecret)
 
 1. Wait for the startup script to open browser tabs for the rendered site
    and Sitecore Launchpad.
