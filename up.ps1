@@ -1,3 +1,9 @@
+Param (
+    [switch]$SilentLogin,
+    [string]$AuthClientId,
+    [string]$AuthClientSecret,
+    [string]$xmCloudAud
+)
 $ErrorActionPreference = "Stop";
 
 $envContent = Get-Content .env -Encoding UTF8
@@ -5,11 +11,13 @@ $xmCloudHost = $envContent | Where-Object { $_ -imatch "^CM_HOST=.+" }
 $xmCloudDeployConfig = $envContent | Where-Object { $_ -imatch "^XMCLOUDDEPLOY_CONFIG=.+" }
 $sitecoreDockerRegistry = $envContent | Where-Object { $_ -imatch "^SITECORE_DOCKER_REGISTRY=.+" }
 $sitecoreVersion = $envContent | Where-Object { $_ -imatch "^SITECORE_VERSION=.+" }
+$xmCloudDomain = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_Domain=.+" }
 
 $xmCloudHost = $xmCloudHost.Split("=")[1]
 $xmCloudDeployConfig = $xmCloudDeployConfig.Split("=")[1]
 $sitecoreDockerRegistry = $sitecoreDockerRegistry.Split("=")[1]
 $sitecoreVersion = $sitecoreVersion.Split("=")[1]
+$xmCloudDomain = $xmCloudDomain.Split("=")[1]
 
 # Double check whether init has been run
 $envCheckVariable = "HOST_LICENSE_FOLDER"
@@ -66,7 +74,12 @@ foreach ($pluginJsonFile in $pluginJsonFiles) {
 }
 
 Write-Host "Logging into Sitecore..." -ForegroundColor Green
-dotnet sitecore cloud login
+if ($SilentLogin) {
+    dotnet sitecore cloud login --authority $xmCloudDomain --audience $xmCloudAud --client-id $AuthClientId --client-secret $AuthClientSecret --client-credentials
+}
+else {
+    dotnet sitecore cloud login
+}
 dotnet sitecore login --ref xmcloud --cm https://$xmCloudHost --allow-write true
 
 if ($LASTEXITCODE -ne 0) {
