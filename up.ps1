@@ -75,12 +75,12 @@ foreach ($pluginJsonFile in $pluginJsonFiles) {
 
 Write-Host "Logging into Sitecore..." -ForegroundColor Green
 if ($SilentLogin) {
-    dotnet sitecore cloud login --authority $xmCloudDomain --audience $xmCloudAud --client-id $AuthClientId --client-secret $AuthClientSecret --client-credentials
+    dotnet sitecore cloud login --authority $xmCloudDomain --audience $xmCloudAud --client-id $AuthClientId --client-secret $AuthClientSecret --client-credentials --allow-write true
 }
 else {
     dotnet sitecore cloud login
+	dotnet sitecore login --ref xmcloud --cm https://$xmCloudHost --allow-write true
 }
-dotnet sitecore login --ref xmcloud --cm https://$xmCloudHost --allow-write true
 
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Unable to log into Sitecore, did the Sitecore environment start correctly? See logs above."
