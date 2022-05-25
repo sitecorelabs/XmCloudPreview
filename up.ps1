@@ -5,20 +5,20 @@ $xmCloudHost = $envContent | Where-Object { $_ -imatch "^CM_HOST=.+" }
 $xmCloudDeployConfig = $envContent | Where-Object { $_ -imatch "^XMCLOUDDEPLOY_CONFIG=.+" }
 $sitecoreDockerRegistry = $envContent | Where-Object { $_ -imatch "^SITECORE_DOCKER_REGISTRY=.+" }
 $sitecoreVersion = $envContent | Where-Object { $_ -imatch "^SITECORE_VERSION=.+" }
-$SilentLogin = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_SilentLogin=.+" }
+$ClientCredentialsLogin = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_ClientCredentialsLogin=.+" }
 
 $xmCloudHost = $xmCloudHost.Split("=")[1]
 $xmCloudDeployConfig = $xmCloudDeployConfig.Split("=")[1]
 $sitecoreDockerRegistry = $sitecoreDockerRegistry.Split("=")[1]
 $sitecoreVersion = $sitecoreVersion.Split("=")[1]
-$SilentLogin = $SilentLogin.Split("=")[1]
-if ($SilentLogin -eq "true") {
+$ClientCredentialsLogin = $ClientCredentialsLogin.Split("=")[1]
+if ($ClientCredentialsLogin -eq "true") {
 	$xmCloudDomain = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_Domain=.+" }
-	$xmCloudAudSilentLogin = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_AudienceForSilentLogin=.+" }
+	$xmCloudAudienceForClientCredentialsLogin = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_AudienceForClientCredentialsLogin=.+" }
 	$xmCloudClientId = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_ClientId=.+" }
 	$xmCloudClientSecret = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_ClientSecret=.+" }
 	$xmCloudDomain = $xmCloudDomain.Split("=")[1]
-	$xmCloudAudSilentLogin = $xmCloudAudSilentLogin.Split("=")[1]
+	$xmCloudAudienceForClientCredentialsLogin = $xmCloudAudienceForClientCredentialsLogin.Split("=")[1]
 	$xmCloudClientId = $xmCloudClientId.Split("=")[1]
 	$xmCloudClientSecret = $xmCloudClientSecret.Split("=")[1]
 }
@@ -79,12 +79,12 @@ foreach ($pluginJsonFile in $pluginJsonFiles) {
 }
 
 Write-Host "Logging into Sitecore..." -ForegroundColor Green
-if ($SilentLogin -eq "true") {
-    dotnet sitecore cloud login --authority $xmCloudDomain --audience $xmCloudAudSilentLogin --client-id $xmCloudClientId --client-secret $xmCloudClientSecret --client-credentials
+if ($ClientCredentialsLogin -eq "true") {
+    dotnet sitecore cloud login --authority $xmCloudDomain --audience $xmCloudAudienceForClientCredentialsLogin --client-id $xmCloudClientId --client-secret $xmCloudClientSecret --client-credentials
 }
 else {
     dotnet sitecore cloud login
-	dotnet sitecore login --ref xmcloud --cm https://$xmCloudHost --allow-write true
+    dotnet sitecore login --ref xmcloud --cm https://$xmCloudHost --allow-write true
 }
 
 if ($LASTEXITCODE -ne 0) {
