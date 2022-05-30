@@ -81,6 +81,7 @@ foreach ($pluginJsonFile in $pluginJsonFiles) {
 Write-Host "Logging into Sitecore..." -ForegroundColor Green
 if ($ClientCredentialsLogin -eq "true") {
     dotnet sitecore cloud login --authority $xmCloudDomain --audience $xmCloudAudienceForClientCredentialsLogin --client-id $xmCloudClientId --client-secret $xmCloudClientSecret --client-credentials
+    dotnet sitecore login --authority $xmCloudDomain --audience $xmCloudAudienceForClientCredentialsLogin --client-id $xmCloudClientId --client-secret $xmCloudClientSecret --client-credentials true --allow-write true
 }
 else {
     dotnet sitecore cloud login
