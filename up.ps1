@@ -13,14 +13,14 @@ $sitecoreDockerRegistry = $sitecoreDockerRegistry.Split("=")[1]
 $sitecoreVersion = $sitecoreVersion.Split("=")[1]
 $ClientCredentialsLogin = $ClientCredentialsLogin.Split("=")[1]
 if ($ClientCredentialsLogin -eq "true") {
-	$xmCloudDomain = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_Domain=.+" }
-	$xmCloudAudienceForClientCredentialsLogin = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_AudienceForClientCredentialsLogin=.+" }
-	$xmCloudClientId = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_ClientId=.+" }
-	$xmCloudClientSecret = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_ClientSecret=.+" }
-	$xmCloudDomain = $xmCloudDomain.Split("=")[1]
-	$xmCloudAudienceForClientCredentialsLogin = $xmCloudAudienceForClientCredentialsLogin.Split("=")[1]
-	$xmCloudClientId = $xmCloudClientId.Split("=")[1]
-	$xmCloudClientSecret = $xmCloudClientSecret.Split("=")[1]
+	$xmCloudClientCredentialsLoginDomain = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_Domain=.+" }
+	$xmCloudClientCredentialsLoginAudience = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_ClientCredentialsLogin_Audience=.+" }
+	$xmCloudClientCredentialsLoginClientId = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_ClientCredentialsLogin_ClientId=.+" }
+	$xmCloudClientCredentialsLoginClientSecret = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_ClientCredentialsLogin_ClientSecret=.+" }
+	$xmCloudClientCredentialsLoginDomain = $xmCloudClientCredentialsLoginDomain.Split("=")[1]
+	$xmCloudClientCredentialsLoginAudience = $xmCloudClientCredentialsLoginAudience.Split("=")[1]
+	$xmCloudClientCredentialsLoginClientId = $xmCloudClientCredentialsLoginClientId.Split("=")[1]
+	$xmCloudClientCredentialsLoginClientSecret = $xmCloudClientCredentialsLoginClientSecret.Split("=")[1]
 }
 
 
@@ -80,8 +80,8 @@ foreach ($pluginJsonFile in $pluginJsonFiles) {
 
 Write-Host "Logging into Sitecore..." -ForegroundColor Green
 if ($ClientCredentialsLogin -eq "true") {
-    dotnet sitecore cloud login --authority $xmCloudDomain --audience $xmCloudAudienceForClientCredentialsLogin --client-id $xmCloudClientId --client-secret $xmCloudClientSecret --client-credentials
-    dotnet sitecore login --authority $xmCloudDomain --audience $xmCloudAudienceForClientCredentialsLogin --client-id $xmCloudClientId --client-secret $xmCloudClientSecret --client-credentials true --allow-write true
+    dotnet sitecore cloud login --client-id $xmCloudClientCredentialsLoginClientId --client-secret $xmCloudClientCredentialsLoginClientSecret --client-credentials true
+    dotnet sitecore login --authority $xmCloudClientCredentialsLoginDomain --audience $xmCloudClientCredentialsLoginAudience --client-id $xmCloudClientCredentialsLoginClientId --client-secret $xmCloudClientCredentialsLoginClientSecret --cm https://$xmCloudHost --client-credentials true --allow-write true
 }
 else {
     dotnet sitecore cloud login
@@ -146,12 +146,12 @@ if (Test-Path .\src\items\content) {
     Write-Host "Pulling JSS deployed items..." -ForegroundColor Green
     dotnet sitecore ser pull
 }
-
-Write-Host "Opening site..." -ForegroundColor Green
-
-Start-Process https://xmcloudcm.localhost/sitecore/
-Start-Process https://www.xmcloudpreview.localhost/
-
+if ($ClientCredentialsLogin -ne "true") {
+    Write-Host "Opening site..." -ForegroundColor Green
+    
+    Start-Process https://xmcloudcm.localhost/sitecore/
+    Start-Process https://www.xmcloudpreview.localhost/
+}
 Write-Host ""
 Write-Host "Use the following command to monitor your Rendering Host:" -ForegroundColor Green
 Write-Host "docker-compose logs -f rendering"
