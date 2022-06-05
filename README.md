@@ -124,6 +124,7 @@ See Sitecore Containers documentation for more information on system requirement
 
 1. When prompted, log into Sitecore via your browser, and
    accept the device authorization.
+    * To log in via client credentials flow, set the environment variable SITECORE_FedAuth_dot_Auth0_dot_ClientCredentialsLogin to "true" and update values of the correspond environment variables (SITECORE_FedAuth_dot_Auth0_dot_Domain, SITECORE_FedAuth_dot_Auth0_dot_ClientCredentialsLogin_ClientId, SITECORE_FedAuth_dot_Auth0_dot_ClientCredentialsLogin_ClientSecret, SITECORE_FedAuth_dot_Auth0_dot_ClientCredentialsLogin_Audience, SITECORE_XmCloud_dot_OrganizationId)
 
 1. Wait for the startup script to open browser tabs for the rendered site
    and Sitecore Launchpad.
