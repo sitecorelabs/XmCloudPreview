@@ -5,11 +5,24 @@ $xmCloudHost = $envContent | Where-Object { $_ -imatch "^CM_HOST=.+" }
 $xmCloudDeployConfig = $envContent | Where-Object { $_ -imatch "^XMCLOUDDEPLOY_CONFIG=.+" }
 $sitecoreDockerRegistry = $envContent | Where-Object { $_ -imatch "^SITECORE_DOCKER_REGISTRY=.+" }
 $sitecoreVersion = $envContent | Where-Object { $_ -imatch "^SITECORE_VERSION=.+" }
+$ClientCredentialsLogin = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_ClientCredentialsLogin=.+" }
 
 $xmCloudHost = $xmCloudHost.Split("=")[1]
 $xmCloudDeployConfig = $xmCloudDeployConfig.Split("=")[1]
 $sitecoreDockerRegistry = $sitecoreDockerRegistry.Split("=")[1]
 $sitecoreVersion = $sitecoreVersion.Split("=")[1]
+$ClientCredentialsLogin = $ClientCredentialsLogin.Split("=")[1]
+if ($ClientCredentialsLogin -eq "true") {
+	$xmCloudClientCredentialsLoginDomain = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_Domain=.+" }
+	$xmCloudClientCredentialsLoginAudience = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_ClientCredentialsLogin_Audience=.+" }
+	$xmCloudClientCredentialsLoginClientId = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_ClientCredentialsLogin_ClientId=.+" }
+	$xmCloudClientCredentialsLoginClientSecret = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_ClientCredentialsLogin_ClientSecret=.+" }
+	$xmCloudClientCredentialsLoginDomain = $xmCloudClientCredentialsLoginDomain.Split("=")[1]
+	$xmCloudClientCredentialsLoginAudience = $xmCloudClientCredentialsLoginAudience.Split("=")[1]
+	$xmCloudClientCredentialsLoginClientId = $xmCloudClientCredentialsLoginClientId.Split("=")[1]
+	$xmCloudClientCredentialsLoginClientSecret = $xmCloudClientCredentialsLoginClientSecret.Split("=")[1]
+}
+
 
 # Double check whether init has been run
 $envCheckVariable = "HOST_LICENSE_FOLDER"
@@ -66,8 +79,14 @@ foreach ($pluginJsonFile in $pluginJsonFiles) {
 }
 
 Write-Host "Logging into Sitecore..." -ForegroundColor Green
-dotnet sitecore cloud login
-dotnet sitecore login --ref xmcloud --cm https://$xmCloudHost --allow-write true
+if ($ClientCredentialsLogin -eq "true") {
+    dotnet sitecore cloud login --client-id $xmCloudClientCredentialsLoginClientId --client-secret $xmCloudClientCredentialsLoginClientSecret --client-credentials true
+    dotnet sitecore login --authority $xmCloudClientCredentialsLoginDomain --audience $xmCloudClientCredentialsLoginAudience --client-id $xmCloudClientCredentialsLoginClientId --client-secret $xmCloudClientCredentialsLoginClientSecret --cm https://$xmCloudHost --client-credentials true --allow-write true
+}
+else {
+    dotnet sitecore cloud login
+    dotnet sitecore login --ref xmcloud --cm https://$xmCloudHost --allow-write true
+}
 
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Unable to log into Sitecore, did the Sitecore environment start correctly? See logs above."
@@ -127,12 +146,12 @@ if (Test-Path .\src\items\content) {
     Write-Host "Pulling JSS deployed items..." -ForegroundColor Green
     dotnet sitecore ser pull
 }
-
-Write-Host "Opening site..." -ForegroundColor Green
-
-Start-Process https://xmcloudcm.localhost/sitecore/
-Start-Process https://www.xmcloudpreview.localhost/
-
+if ($ClientCredentialsLogin -ne "true") {
+    Write-Host "Opening site..." -ForegroundColor Green
+    
+    Start-Process https://xmcloudcm.localhost/sitecore/
+    Start-Process https://www.xmcloudpreview.localhost/
+}
 Write-Host ""
 Write-Host "Use the following command to monitor your Rendering Host:" -ForegroundColor Green
 Write-Host "docker-compose logs -f rendering"
