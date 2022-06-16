@@ -6,6 +6,7 @@ $xmCloudDeployConfig = $envContent | Where-Object { $_ -imatch "^XMCLOUDDEPLOY_C
 $sitecoreDockerRegistry = $envContent | Where-Object { $_ -imatch "^SITECORE_DOCKER_REGISTRY=.+" }
 $sitecoreVersion = $envContent | Where-Object { $_ -imatch "^SITECORE_VERSION=.+" }
 $ClientCredentialsLogin = $envContent | Where-Object { $_ -imatch "^SITECORE_FedAuth_dot_Auth0_dot_ClientCredentialsLogin=.+" }
+$sitecoreApiKey = ($envContent | Where-Object { $_ -imatch "^SITECORE_API_KEY_xmcloudpreview=.+" }).Split('=')[1]
 
 $xmCloudHost = $xmCloudHost.Split("=")[1]
 $xmCloudDeployConfig = $xmCloudDeployConfig.Split("=")[1]
@@ -146,12 +147,22 @@ if (Test-Path .\src\items\content) {
     Write-Host "Pulling JSS deployed items..." -ForegroundColor Green
     dotnet sitecore ser pull
 }
+
 if ($ClientCredentialsLogin -ne "true") {
     Write-Host "Opening site..." -ForegroundColor Green
     
     Start-Process https://xmcloudcm.localhost/sitecore/
     Start-Process https://www.xmcloudpreview.localhost/
 }
+
+Write-Host "Pushing sitecore API key" -ForegroundColor Green
+& docker\build\cm\templates\import-templates.ps1 -RenderingSiteName "xmcloudpreview" -SitecoreApiKey $sitecoreApiKey
+
+Write-Host "Opening site..." -ForegroundColor Green
+
+Start-Process https://xmcloudcm.localhost/sitecore/
+Start-Process https://www.xmcloudpreview.localhost/
+
 Write-Host ""
 Write-Host "Use the following command to monitor your Rendering Host:" -ForegroundColor Green
 Write-Host "docker-compose logs -f rendering"
