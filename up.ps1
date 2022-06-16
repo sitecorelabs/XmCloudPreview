@@ -5,6 +5,7 @@ $xmCloudHost = $envContent | Where-Object { $_ -imatch "^CM_HOST=.+" }
 $xmCloudDeployConfig = $envContent | Where-Object { $_ -imatch "^XMCLOUDDEPLOY_CONFIG=.+" }
 $sitecoreDockerRegistry = $envContent | Where-Object { $_ -imatch "^SITECORE_DOCKER_REGISTRY=.+" }
 $sitecoreVersion = $envContent | Where-Object { $_ -imatch "^SITECORE_VERSION=.+" }
+$sitecoreApiKey = ($envContent | Where-Object { $_ -imatch "^SITECORE_API_KEY_xmcloudpreview=.+" }).Split('=')[1]
 
 $xmCloudHost = $xmCloudHost.Split("=")[1]
 $xmCloudDeployConfig = $xmCloudDeployConfig.Split("=")[1]
@@ -127,6 +128,9 @@ if (Test-Path .\src\items\content) {
     Write-Host "Pulling JSS deployed items..." -ForegroundColor Green
     dotnet sitecore ser pull
 }
+
+Write-Host "Pushing sitecore API key" -ForegroundColor Green
+& docker\build\cm\templates\import-templates.ps1 -RenderingSiteName "xmcloudpreview" -SitecoreApiKey $sitecoreApiKey
 
 Write-Host "Opening site..." -ForegroundColor Green
 
